@@ -1,13 +1,16 @@
-// main.ts
-import 'dotenv/config'; // ✅ ADD THIS AS THE VERY FIRST LINE
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { ExpressAdapter } from '@nestjs/platform-express';
+
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const server = express();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
-  const cookieParser = require('cookie-parser');
   app.use(cookieParser());
 
   app.useGlobalPipes(
@@ -25,9 +28,9 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`🚀 Backend running on http://localhost:${port}`);
+  await app.init();
 }
 
 bootstrap();
+
+export default server;
